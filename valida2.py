@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # ===============================================================
-# 🌾 PREDWEEM INTEGRAL vK4.9.10 — LOLIUM AZUL 2026
+# 🌾 PREDWEEM INTEGRAL vK4.9.10 — LOLIUM OLAVARRÍA 2026
 # Actualización:
-# - ADAPTACIÓN AZUL: Coordenadas mantenidas estrictamente en -36.87 para ET0.
+# - ADAPTACIÓN OLAVARRÍA: Coordenadas mantenidas estrictamente en -36.8799 para ET0.
 # - Validación: Match estricto de valores (Campo > 0 O Simulado > 0).
 # - Se eliminan los pares (0,0) para la correlación de flujos y el gráfico 1:1.
 # - UNIFICACIÓN MECANÍSTICA 100%: Reemplazo de flujos diarios por INTEGRACIÓN EN INTERVALOS.
@@ -25,7 +25,7 @@ import base64
 # 1. PANTALLA DE CARGA ULTRARRÁPIDA
 # ---------------------------------------------------------
 if 'arranque_fase' not in st.session_state:
-    st.set_page_config(page_title="PREDWEEM AZUL INTEGRAL", layout="wide", page_icon="🌾")
+    st.set_page_config(page_title="PREDWEEM OLAVARRÍA INTEGRAL", layout="wide", page_icon="🌾")
     st.markdown("<br><br><br>", unsafe_allow_html=True)
     st.info("🚜 **Iniciando Servidor PREDWEEM Integral...** Cargando módulos de validación.")
     st.progress(20)
@@ -138,8 +138,8 @@ def calculate_tt_scalar(t, t_base, t_opt, t_crit):
     elif t < t_crit: return (t - t_base) * ((t_crit - t) / (t_crit - t_opt))
     else: return 0.0
 
-def calcular_et0_hargreaves(jday, tmax, tmin, latitud=-36.87):
-    # Latitud ajustada para Azul (-36.87)
+def calcular_et0_hargreaves(jday, tmax, tmin, latitud=-36.8799):
+    # Latitud ajustada para Olavarría (-36.8799)
     lat_rad = np.radians(latitud)
     dr = 1 + 0.033 * np.cos(2 * np.pi / 365 * jday)
     dec = 0.409 * np.sin(2 * np.pi / 365 * jday - 1.39)
@@ -238,13 +238,13 @@ def calcular_metricas_validacion_integral(df_sync):
 # ---------------------------------------------------------
 modelo_ann, cluster_model = load_models()
 
-st.title("🌾 PREDWEEM LOLIUM - Azul (BA) Integral LAT = -36.87 LON = -59.89")
+st.title("🌾 PREDWEEM LOLIUM - Olavarría (BA) Integral LAT = -36.8799 LON = -60.2160")
 
 with st.expander("📂 1. Datos del Lote", expanded=True):
     col_upload, col_rastrojo = st.columns(2)
     
     with col_upload:
-        archivo_meteo = st.file_uploader("1. Clima (Azul)", type=["xlsx", "csv"])
+        archivo_meteo = st.file_uploader("1. Clima (Olavarría)", type=["xlsx", "csv"])
         archivo_campo = st.file_uploader("2. Campo (Validación)", type=["xlsx", "csv"])
         
     with col_rastrojo:
@@ -285,7 +285,7 @@ with st.expander("📂 1. Datos del Lote", expanded=True):
             st.markdown(html_card, unsafe_allow_html=True)
 
 # --- SIDEBAR ---
-st.sidebar.image("https://raw.githubusercontent.com/PREDWEEM/LOLIUM_AZUL2026/main/logo.png", use_container_width=True)
+st.sidebar.image("https://raw.githubusercontent.com/PREDWEEM/LOLIUM_OLAVA2026/main/logo.png", use_container_width=True)
 
 st.sidebar.markdown("## ⚙️ 2. Fisiología y Logística")
 umbral_er = st.sidebar.slider("Umbral Alerta Temprana", 0.05, 0.80, 0.50)
@@ -312,7 +312,7 @@ st.sidebar.markdown("## 💧 3. Balance Hídrico (Suelo)")
 w_max_val = st.sidebar.number_input("Cap. de Campo Superficial (mm)", value=30.0, step=1.0)
 
 df_meteo_raw = load_data(archivo_meteo, "meteo_daily")
-df_campo_raw = load_data(archivo_campo, "azul_campo")
+df_campo_raw = load_data(archivo_campo, "olava_campo")
 
 # ---------------------------------------------------------
 # 6. MOTOR DE CÁLCULO
@@ -352,8 +352,8 @@ if df_meteo_raw is not None and modelo_ann is not None:
     mask_ruptura = (df["Julian_days"] <= 110) & (df["Prec_3d"] >= umbral_choque_hidrico)
     df.loc[mask_ruptura, "EMERREL"] = np.maximum(df.loc[mask_ruptura, "EMERREL"], 0.75)
 
-    # Balance Hídrico Superficial (Azul)
-    df["ET0"] = calcular_et0_hargreaves(df["Julian_days"].values, df["TMAX"].values, df["TMIN"].values, latitud=-36.87)
+    # Balance Hídrico Superficial (Olavarría)
+    df["ET0"] = calcular_et0_hargreaves(df["Julian_days"].values, df["TMAX"].values, df["TMIN"].values, latitud=-36.8799)
     df["W_superficial"] = balance_hidrico_superficial(df["Prec"].values, df["ET0"].values, w_max=w_max_val, ke_suelo=ke_val)
     humedad_relativa = df["W_superficial"] / w_max_val
     df["Hydric_Factor"] = 1 / (1 + np.exp(-10 * (humedad_relativa - 0.3)))
@@ -518,7 +518,7 @@ if df_meteo_raw is not None and modelo_ann is not None:
         st.plotly_chart(fig_hidrico.update_layout(title="Precipitación vs. Retención Real de Humedad", xaxis_title="Fecha", yaxis_title="Milímetros (mm)", height=450, hovermode="x unified", legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)), use_container_width=True)
 
     with tab3:
-        st.header("🔍 Clasificación DTW (Azul)")
+        st.header("🔍 Clasificación DTW (Olavarría)")
         df_obs = df[df["Fecha"] < pd.Timestamp("2026-05-01")].copy()
         if not df_obs.empty and df_obs["EMERREL"].sum() > 0:
             jd_corte = df_obs["Julian_days"].max()
@@ -556,7 +556,7 @@ if df_meteo_raw is not None and modelo_ann is not None:
             pd.DataFrame({'Métrica': ['PEC (%)', 'Lag Control (días)', 'Lead Time Control (días)', 'Pearson (Valores > 0)', 'RMSE (Acumulado)', 'CCC (Acumulado)', 'Desfase T50 Global (días)'], 'Valor': [pec, peak_lag, lead_time, pearson_r, rmse_acum, ccc_acum, desfase_t50]}).to_excel(writer, sheet_name='Validacion_Campo', index=False)
         pd.DataFrame({'Configuracion': ['T_Base', 'T_Optima', 'T_Critica', 'W_Max', 'Ke', 'Mod_Termico', 'Umbral_Termoinhibicion'], 'Valor': [t_base_val, t_opt_max, t_critica, w_max_val, ke_val, mod_termico, umbral_termoinhibicion]}).to_excel(writer, sheet_name='Bio_Params', index=False)
 
-    st.sidebar.download_button("📥 Descargar Reporte Completo", output.getvalue(), "PREDWEEM_Integral_Azul_vK4_9_10_clean.xlsx")
+    st.sidebar.download_button("📥 Descargar Reporte Completo", output.getvalue(), "PREDWEEM_Integral_Olava_vK4_9_10_clean.xlsx")
 
 else:
     st.info("👋 Bienvenido a PREDWEEM. Cargue datos climáticos para comenzar.")
