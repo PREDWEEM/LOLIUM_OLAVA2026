@@ -1,4 +1,4 @@
-name: Actualizar Datos Meteorológicos Azul
+name: Actualizar Datos Meteorológicos 
 
 # Cuándo se va a ejecutar esto:
 on:
@@ -25,11 +25,11 @@ jobs:
           pip install pandas requests
 
       - name: Ejecutar script de descarga
-        run: python descargar_clima_azul.py
+        run: python descargar_clima_olavarria.py
 
       - name: Hacer commit y push de los cambios
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add meteo_daily_azul_real.csv
+          git add meteo_daily_olava_real.csv
           git diff --quiet && git diff --staged --quiet || (git commit -m "Actualización automática de datos meteorológicos" && git push)
