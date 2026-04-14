@@ -44,6 +44,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No hay cambios nuevos en el pronóstico de Azul. Saltando commit."
           else
-            git commit -m "Actualización programada: Clima Azul (ECMWF)"
+            git commit -m "Actualización programada: Clima OLAVARRIA (ECMWF)"
             git push
           fi
