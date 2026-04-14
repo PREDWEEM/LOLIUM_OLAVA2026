@@ -3,9 +3,9 @@ import pandas as pd
 import sys
 import os
 
-# Coordenadas de Azul, Provincia de Buenos Aires
-LAT = -36.7770
-LON = -59.8586
+# Coordenadas de OLAVARRIA, Provincia de Buenos Aires
+LAT = -36.8799
+LON = -60.2160
 ARCHIVO_CSV = 'meteo_daily.csv'
 
 def actualizar_pronostico():
@@ -18,7 +18,7 @@ def actualizar_pronostico():
         "forecast_days": 7
     }
     
-    print("Consultando a Open-Meteo para Azul...")
+    print("Consultando a Open-Meteo ...")
     response = requests.get(url, params=params)
     
     if response.status_code != 200:
