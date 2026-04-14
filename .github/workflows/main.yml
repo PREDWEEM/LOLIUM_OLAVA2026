@@ -1,4 +1,4 @@
-name: Actualizacion Diaria Clima Azul
+name: Actualizacion Diaria Clima 
 
 on:
   schedule:
