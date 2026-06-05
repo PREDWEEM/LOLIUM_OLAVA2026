@@ -362,7 +362,7 @@ with st.expander("📂 1. Datos del Lote", expanded=True):
             st.markdown("#### 🌾 Manejo de Superficie")
             cobertura_pct = st.slider(
                 "Cobertura de Rastrojo en Suelo (%)",
-                min_value=0, max_value=100, value=85, step=5,
+                min_value=0, max_value=100, value=10, step=5,
                 help="0% = Suelo desnudo / Labranza. 100% = Cobertura total (Ej. Cultivo de Servicio)."
             )
 
@@ -425,7 +425,7 @@ st.sidebar.divider()
 st.sidebar.markdown("## 📊 4. Flexibilidad Estadística")
 ventana_agrupacion = st.sidebar.slider(
     "Ventana de Validación (días)", 
-    min_value=1, max_value=30, value=14, step=1, 
+    min_value=1, max_value=30, value=16, step=1, 
     help="Define la Unidad de Decisión Agronómica. Agrupa flujos y sombrea el gráfico principal en intervalos de N días."
 )
 
