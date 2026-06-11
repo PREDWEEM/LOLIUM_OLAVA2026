@@ -19,7 +19,7 @@ def actualizar_pronostico():
         "daily": ["temperature_2m_max", "temperature_2m_min", "precipitation_sum"],
         "timezone": "America/Argentina/Buenos_Aires",
         "past_days": 14,
-        "forecast_days": 7
+        "forecast_days": 10
     }
     
     print("Consultando a Open-Meteo (Ventana Híbrida: -14d a +7d) ...")
