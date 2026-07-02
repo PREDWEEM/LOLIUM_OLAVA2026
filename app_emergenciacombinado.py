@@ -4,7 +4,8 @@
 # Actualización y Rigor Científico:
 # - ADAPTACIÓN OLAVARRÍA: Coordenadas fijas en -36.8799 para el motor de ET0.
 # - IDENTIDAD: PREDWEEM by GUILLERMO R. CHANTRE.
-# - LATENCIA INICIAL: Bloqueo estricto de emergencia los primeros 25 días del año.
+# - LATENCIA INICIAL: Bloqueo estricto de emergencia los primeros 45 días del año.
+# - ESCUDO TERMOFISIOLÓGICO: Horizonte de termoinhibición dinámico ajustado a 5 días.
 # - VALIDACIÓN DE FRECUENCIA VARIABLE: Incorporación del método de Integración 
 #   Dinámica por Intervalo Real (Event-to-Event), protegiendo la varianza pura de los flujos.
 # - OPTIMIZADOR 2D BIO-FÍSICO: Barrido de parámetros de suelo (W_Max y Ke) ajustado a ventanas de campo.
@@ -281,7 +282,7 @@ def calcular_metricas_validacion_integral(df_sync, umbral_deteccion=0.05):
     obs_eventos = df_sync['Campo_Relativo'] > umbral_deteccion
     sim_eventos = df_sync['Sim_Relativo'] > umbral_deteccion
 
-    hits = np.sum(obs_eventos & sim_eventos)                 
+    hits = np.sum(obs_eventos & sim_eventos)                  
     misses = np.sum(obs_eventos & ~sim_eventos)              
     false_alarms = np.sum(~obs_eventos & sim_eventos)        
     correct_negatives = np.sum(~obs_eventos & ~sim_eventos)  
@@ -347,8 +348,9 @@ def optimizar_parametros_hidricos_2d(df_meteo, df_campo, modelo_ann, latitud_ola
             df_sim['Lluvia_Recarga'] = (df_sim['Prec'] >= w_max).cummax()
             df_sim.loc[~df_sim['Lluvia_Recarga'], "EMERREL"] = 0.0
             
-            df_sim["Tmedia_10d"] = df_sim["Tmedia_aire"].rolling(window=10, min_periods=1).mean()
-            df_sim.loc[df_sim["Tmedia_10d"] >= 24.0, "EMERREL"] = 0.0
+            # Horizonte térmico de 5 días acoplado en el optimizador
+            df_sim["Tmedia_5d"] = df_sim["Tmedia_aire"].rolling(window=5, min_periods=1).mean()
+            df_sim.loc[df_sim["Tmedia_5d"] >= 24.0, "EMERREL"] = 0.0
             
             df_sync = sincronizar_intervalos_variables(df_sim, df_campo, col_fecha, col_plm2)
             metricas = calcular_metricas_validacion_integral(df_sync)
@@ -447,7 +449,7 @@ st.sidebar.info("🔬 **Modo Event-to-Event Habilitado**: El cálculo de error s
 with st.sidebar.expander("🛠️ Modo Dev: Calibrador Bio-Físico 2D", expanded=False):
     st.caption("Mapea combinaciones hídricas óptimas directamente contra ventanas de muestreo reales de campo.")
     if st.button("Ejecutar Barrido Hídrico"):
-        if df_meteo_raw is not None and df_campo_raw is not None and modelo_ann is not None:
+        if df_meteo_raw is not None Defense df_campo_raw is not None and modelo_ann is not None:
             with st.spinner('Ejecutando iteraciones hídricas puras sobre fechas reales...'):
                 df_meteo_opt = df_meteo_raw.copy()
                 df_meteo_opt.columns = [c.upper().strip() for c in df_meteo_opt.columns]
@@ -493,16 +495,16 @@ if df_meteo_raw is not None and modelo_ann is not None:
         df_campo['Campo_Normalizado'] = df_campo[col_plm2] / max_plm2 if max_plm2 > 0 else 0
 
     # ----------------------------------------------------
-    # CORRECCIÓN: Lógica Fisiológica Ordenada
+    # CONFIGURACIÓN FISIOLÓGICA ACTUALIZADA
     # ----------------------------------------------------
     # 1. Predicción Neural Base
     X = df[["Julian_days", "TMAX_suelo", "TMIN_suelo", "Prec"]].to_numpy(float)
     emerrel_raw, _ = modelo_ann.predict(X)
     df["EMERREL"] = np.maximum(emerrel_raw, 0.0)
 
-    # 2. Bypass Ruptura Temprana (Olavarría = 0.75) - ESTRICTAMENTE LUEGO DEL DÍA 25
+    # 2. Bypass Ruptura Temprana (Olavarría = 0.75) - ESTRICTAMENTE LUEGO DEL DÍA 45
     df["Prec_3d"] = df["Prec"].rolling(window=3, min_periods=1).sum()
-    mask_ruptura = (df["Julian_days"] > 25) & (df["Julian_days"] <= 110) & (df["Prec_3d"] >= umbral_choque_hidrico)
+    mask_ruptura = (df["Julian_days"] > 45) & (df["Julian_days"] <= 110) & (df["Prec_3d"] >= umbral_choque_hidrico)
     df.loc[mask_ruptura, "EMERREL"] = np.maximum(df.loc[mask_ruptura, "EMERREL"], 0.75)
 
     # 3. Balance Hídrico Superficial (Olavarría)
@@ -516,13 +518,13 @@ if df_meteo_raw is not None and modelo_ann is not None:
     df['Lluvia_Recarga'] = (df['Prec'] >= w_max_val).cummax()
     df.loc[~df['Lluvia_Recarga'], "EMERREL"] = 0.0
 
-    # 4. Escudo Termofisiológico
+    # 4. Escudo Termofisiológico — HORIZONTE DE EVALUACIÓN REDUCIDO A 5 DÍAS
     df["Tmedia"] = df["Tmedia_aire"]
-    df["Tmedia_10d"] = df["Tmedia"].rolling(window=10, min_periods=1).mean()
-    df.loc[df["Tmedia_10d"] >= umbral_termoinhibicion, "EMERREL"] = 0.0
+    df["Tmedia_5d"] = df["Tmedia"].rolling(window=5, min_periods=1).mean()
+    df.loc[df["Tmedia_5d"] >= umbral_termoinhibicion, "EMERREL"] = 0.0
 
-    # 5. BLOQUEO FINAL ESTRICTO: Latencia Temprana (Primeros 25 días del año)
-    df.loc[df["Julian_days"] <= 25, "EMERREL"] = 0.0
+    # 5. BLOQUEO FINAL ESTRICTO: Latencia Temprana (Primeros 45 días del año)
+    df.loc[df["Julian_days"] <= 45, "EMERREL"] = 0.0
     # ----------------------------------------------------
 
     df["DG"] = df["Tmedia"].apply(lambda x: calculate_tt_scalar(x, t_base_val, t_opt_max, t_critica))
@@ -726,6 +728,7 @@ if df_meteo_raw is not None and modelo_ann is not None:
             else:
                 st.warning(f"⏳ Esperando primera alerta (Tasa >= {umbral_er}).")
 
+        col_gauge = col_gauge  # Mantenimiento de estructura visual
         with col_gauge:
             max_axis = dga_critico * 1.2
             st.plotly_chart(go.Figure().add_trace(go.Indicator(mode="gauge+number", value=dga_hoy, domain={'x': [0, 1], 'y': [0, 1]}, title={'text': "<b>TT POST-EMERGENCIA (°Cd)</b>", 'font': {'size': 18}}, gauge={'axis': {'range': [None, max_axis]}, 'bar': {'color': "#1e293b", 'thickness': 0.3}, 'steps': [{'range': [0, dga_optimo], 'color': "#4ade80"}, {'range': [dga_optimo, dga_critico], 'color': "#facc15"}, {'range': [dga_critico, max_axis], 'color': "#f87171"}], 'threshold': {'line': {'color': "#2563eb", 'width': 6}, 'thickness': 0.8, 'value': dga_7dias}})).add_annotation(x=0.5, y=-0.1, text=f"{msg_estado}<br>Pronóstico +7d: <b>{dga_7dias:.1f} °Cd</b>", showarrow=False, font=dict(size=14, color="#1e3a8a"), align="center").update_layout(height=350, margin=dict(t=80, b=50, l=30, r=30)), use_container_width=True)
