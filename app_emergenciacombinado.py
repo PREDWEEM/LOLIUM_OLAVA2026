@@ -449,7 +449,7 @@ st.sidebar.info("🔬 **Modo Event-to-Event Habilitado**: El cálculo de error s
 with st.sidebar.expander("🛠️ Modo Dev: Calibrador Bio-Físico 2D", expanded=False):
     st.caption("Mapea combinaciones hídricas óptimas directamente contra ventanas de muestreo reales de campo.")
     if st.button("Ejecutar Barrido Hídrico"):
-        if df_meteo_raw is not None Defense df_campo_raw is not None and modelo_ann is not None:
+        if df_meteo_raw is not None and df_campo_raw is not None and modelo_ann is not None:
             with st.spinner('Ejecutando iteraciones hídricas puras sobre fechas reales...'):
                 df_meteo_opt = df_meteo_raw.copy()
                 df_meteo_opt.columns = [c.upper().strip() for c in df_meteo_opt.columns]
