@@ -481,7 +481,7 @@ umbral_choque_hidrico = st.sidebar.slider(
     "Choque Hídrico 3 días (mm)",
     min_value=20.0,
     max_value=100.0,
-    value=35.0,
+    value=25.0,
     step=1.0
 )
 
