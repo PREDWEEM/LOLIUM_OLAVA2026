@@ -83,7 +83,7 @@ st.markdown("""
 
 BASE = Path(__file__).parent if "__file__" in globals() else Path.cwd()
 
-UMBRAL_PRIMER_PICO = 0.80
+UMBRAL_PRIMER_PICO = 0.70
 
 def set_bg_hack(main_bg_file):
     try:
@@ -481,7 +481,7 @@ umbral_choque_hidrico = st.sidebar.slider(
     "Choque Hídrico 3 días (mm)",
     min_value=20.0,
     max_value=100.0,
-    value=25.0,
+    value=45.0,
     step=1.0
 )
 
