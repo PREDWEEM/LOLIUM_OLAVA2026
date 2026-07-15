@@ -72,6 +72,14 @@ jobs:
           echo "--- metricas_olavarria.csv ---"
           cat resultados_validacion/metricas_olavarria.csv
 
+      - name: Publicar resultados para auditoría
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-validacion-olavarria
+          path: resultados_validacion/
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Verificar delta diario del primer pico
         run: |
           python - <<'PY'
@@ -120,24 +128,10 @@ jobs:
               simulado_diario - observado
           ).days
 
-          print(
-              "Pico observado:",
-              observado.date(),
-          )
-          print(
-              "Pico diario simulado:",
-              simulado_diario.date(),
-          )
-          print(
-              "Delta guardado:",
-              delta_guardado,
-              "días",
-          )
-          print(
-              "Delta recalculado:",
-              delta_recalculado,
-              "días",
-          )
+          print("Pico observado:", observado.date())
+          print("Pico diario simulado:", simulado_diario.date())
+          print("Delta guardado:", delta_guardado, "días")
+          print("Delta recalculado:", delta_recalculado, "días")
           print(
               "Delta esperado para Olavarría:",
               delta_esperado_olavarria,
