@@ -72,6 +72,77 @@ jobs:
           echo "--- metricas_olavarria.csv ---"
           cat resultados_validacion/metricas_olavarria.csv
 
+      - name: Verificar delta diario del primer pico
+        run: |
+          python - <<'PY'
+          import pandas as pd
+
+          ruta = "resultados_validacion/metricas_olavarria.csv"
+          datos = pd.read_csv(ruta)
+
+          requeridas = [
+              "Fecha_primer_pico_observado",
+              "Fecha_primer_pico_simulado",
+              "Delta_primer_pico_dias",
+              "Fecha_primer_pico_simulado_intervalo",
+              "Delta_primer_pico_intervalo_dias",
+              "Metodo_delta_primer_pico",
+          ]
+          faltantes = [
+              columna
+              for columna in requeridas
+              if columna not in datos.columns
+          ]
+          if faltantes:
+              raise SystemExit(
+                  "Faltan columnas: " + ", ".join(faltantes)
+              )
+
+          observado = pd.to_datetime(
+              datos.loc[0, "Fecha_primer_pico_observado"],
+              errors="coerce",
+          )
+          simulado_diario = pd.to_datetime(
+              datos.loc[0, "Fecha_primer_pico_simulado"],
+              errors="coerce",
+          )
+          delta_guardado = datos.loc[
+              0,
+              "Delta_primer_pico_dias",
+          ]
+
+          if pd.notna(observado) and pd.notna(simulado_diario):
+              esperado = (
+                  simulado_diario - observado
+              ).days
+              obtenido = int(delta_guardado)
+
+              print(
+                  "Delta diario obtenido:",
+                  obtenido,
+                  "días",
+              )
+              print(
+                  "Delta diario recalculado:",
+                  esperado,
+                  "días",
+              )
+
+              if obtenido != esperado:
+                  raise SystemExit(
+                      "Delta diario inconsistente: "
+                      f"{obtenido}; se esperaba {esperado}."
+                  )
+
+          metodo = str(
+              datos.loc[0, "Metodo_delta_primer_pico"]
+          )
+          if "diario" not in metodo.lower():
+              raise SystemExit(
+                  "El método no declara resolución diaria."
+              )
+          PY
+
       - name: Guardar resultados actualizados
         if: github.event_name == 'push'
         run: |
