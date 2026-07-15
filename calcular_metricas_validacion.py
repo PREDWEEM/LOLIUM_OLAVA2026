@@ -138,6 +138,7 @@ def instalar_streamlit_silencioso() -> None:
             setattr(modulo, nombre, getattr(stub, nombre))
     modulo.sidebar = stub
     modulo.session_state = stub.session_state
+    modulo.__getattr__ = stub.__getattr__
     sys.modules["streamlit"] = modulo
 
 
