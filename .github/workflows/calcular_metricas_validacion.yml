@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - "calcular_metricas_validacion.py"
+      - "pages/2_Validacion.py"
       - "app_emergenciacombinado.py"
       - "meteo_daily.csv"
       - "VALIDA (1).xlsx"
@@ -19,6 +20,7 @@ on:
       - main
     paths:
       - "calcular_metricas_validacion.py"
+      - "pages/2_Validacion.py"
       - "app_emergenciacombinado.py"
       - "meteo_daily.csv"
       - "VALIDA (1).xlsx"
@@ -56,6 +58,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Validar sintaxis de scripts
+        run: |
+          python -m py_compile calcular_metricas_validacion.py
+          python -m py_compile pages/2_Validacion.py
 
       - name: Calcular métricas locales
         run: python calcular_metricas_validacion.py
