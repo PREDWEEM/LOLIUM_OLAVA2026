@@ -106,33 +106,56 @@ jobs:
               datos.loc[0, "Fecha_primer_pico_simulado"],
               errors="coerce",
           )
-          delta_guardado = datos.loc[
-              0,
-              "Delta_primer_pico_dias",
-          ]
+          delta_guardado = int(
+              datos.loc[0, "Delta_primer_pico_dias"]
+          )
+          delta_esperado_olavarria = -4
 
-          if pd.notna(observado) and pd.notna(simulado_diario):
-              esperado = (
-                  simulado_diario - observado
-              ).days
-              obtenido = int(delta_guardado)
-
-              print(
-                  "Delta diario obtenido:",
-                  obtenido,
-                  "días",
-              )
-              print(
-                  "Delta diario recalculado:",
-                  esperado,
-                  "días",
+          if pd.isna(observado) or pd.isna(simulado_diario):
+              raise SystemExit(
+                  "No se pudieron determinar las fechas del primer pico."
               )
 
-              if obtenido != esperado:
-                  raise SystemExit(
-                      "Delta diario inconsistente: "
-                      f"{obtenido}; se esperaba {esperado}."
-                  )
+          delta_recalculado = (
+              simulado_diario - observado
+          ).days
+
+          print(
+              "Pico observado:",
+              observado.date(),
+          )
+          print(
+              "Pico diario simulado:",
+              simulado_diario.date(),
+          )
+          print(
+              "Delta guardado:",
+              delta_guardado,
+              "días",
+          )
+          print(
+              "Delta recalculado:",
+              delta_recalculado,
+              "días",
+          )
+          print(
+              "Delta esperado para Olavarría:",
+              delta_esperado_olavarria,
+              "días",
+          )
+
+          if delta_guardado != delta_recalculado:
+              raise SystemExit(
+                  "Delta diario inconsistente con las fechas: "
+                  f"{delta_guardado}; se recalculó {delta_recalculado}."
+              )
+
+          if delta_guardado != delta_esperado_olavarria:
+              raise SystemExit(
+                  "Delta diario incorrecto para Olavarría: "
+                  f"{delta_guardado}; se esperaba "
+                  f"{delta_esperado_olavarria}."
+              )
 
           metodo = str(
               datos.loc[0, "Metodo_delta_primer_pico"]
