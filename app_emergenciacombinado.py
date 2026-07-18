@@ -443,7 +443,7 @@ with st.expander("📂 1. Datos del Lote", expanded=True):
             st.markdown("#### 🌾 Manejo de Superficie")
             cobertura_pct = st.slider(
                 "Cobertura de Rastrojo en Suelo (%)",
-                min_value=0, max_value=100, value=65, step=5,
+                min_value=0, max_value=100, value=10, step=5,
                 help="0% = Suelo desnudo / Labranza. 100% = Cobertura total (Ej. Cultivo de Servicio)."
             )
 
@@ -473,7 +473,7 @@ df_campo_raw = load_data(archivo_campo, "olava_campo")
 st.sidebar.image("https://raw.githubusercontent.com/PREDWEEM/LOLIUM_OLAVA2026/main/logo.png", width="stretch")
 
 st.sidebar.markdown("## ⚙️ 2. Fisiología y Logística")
-umbral_er = st.sidebar.slider("Umbral Alerta Temprana", 0.001, 0.80, 0.005)
+umbral_er = st.sidebar.slider("Umbral Alerta Temprana", 0.001, 0.80, 0.001)
 
 st.sidebar.markdown("**Ruptura de Dormición Estival (Escudo)**")
 umbral_termoinhibicion = st.sidebar.number_input("Umbral Termoinhibición (°C)", 15.0, 35.0, 24.0, 0.5)
