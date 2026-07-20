@@ -1,14 +1,17 @@
-name: Actualizar Datos Meteorológicos 
+name: Actualizar Datos Meteorológicos
 
-# Cuándo se va a ejecutar esto:
 on:
-  workflow_dispatch: # Permite ejecutarlo manualmente desde la pestaña "Actions"
+  workflow_dispatch:
   schedule:
-    - cron: '0 12 * * *' # Opcional: Se ejecuta automáticamente todos los días a las 12:00 UTC
+    - cron: '0 12 * * *'
+
+permissions:
+  contents: write
 
 jobs:
   actualizar-datos:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Descargar el repositorio
@@ -29,7 +32,12 @@ jobs:
 
       - name: Hacer commit y push de los cambios
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add meteo_daily_olava_real.csv
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Actualización automática de datos meteorológicos" && git push)
+          if git diff --cached --quiet; then
+            echo "No hay cambios para guardar."
+          else
+            git commit -m "Actualización automática de datos meteorológicos"
+            git push
+          fi
