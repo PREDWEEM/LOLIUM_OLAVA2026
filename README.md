@@ -16,6 +16,10 @@ PREDWEEM es una herramienta de apoyo a la toma de decisiones agronómicas basada
 
 La implementación de este repositorio está orientada a la localidad de **Olavarría** y debe utilizarse dentro del dominio geográfico, climático y agronómico para el cual fue configurada y validada.
 
+## Despliegue privado
+
+La aplicación está preparada para ejecutarse desde un checkout privado. Los datos, el logo y los activos científicos deben cargarse desde archivos locales del repositorio. Consulte [PRIVATE_REPOSITORY.md](PRIVATE_REPOSITORY.md).
+
 ## Condiciones de uso
 
 No se concede licencia de uso por el solo hecho de acceder al repositorio. Cualquier utilización académica, técnica, institucional o comercial que exceda la visualización del contenido requiere autorización previa y escrita del titular de los derechos correspondientes.
