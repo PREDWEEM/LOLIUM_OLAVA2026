@@ -1,4 +1,4 @@
-name: Reintentar adaptación común LOLIUM
+name: Aplicar adaptación LOLIUM por fragmentos
 
 on:
   pull_request:
@@ -17,29 +17,29 @@ jobs:
           ref: agent/adaptacion-comun-lolium
           fetch-depth: 0
 
-      - name: Extraer y aplicar parche
+      - name: Ensamblar y aplicar parche
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-          import base64, gzip, re, subprocess
-          workflow = Path('.github/workflows/export-lolium-source.yml').read_text(encoding='utf-8')
-          match = re.search(r'encoded = "([A-Za-z0-9+/=]+)"', workflow)
-          if not match:
-              raise RuntimeError('No se encontró el paquete de migración.')
-          patch = gzip.decompress(base64.b64decode(match.group(1)))
+          import base64, gzip, subprocess
+          parts = sorted(Path('.migration/parts').glob('part*.txt'))
+          if len(parts) != 11:
+              raise RuntimeError(f'Se esperaban 11 fragmentos y se encontraron {len(parts)}.')
+          encoded = ''.join(p.read_text(encoding='utf-8').strip() for p in parts)
+          if len(encoded) != 10252:
+              raise RuntimeError(f'Longitud Base64 incorrecta: {len(encoded)}.')
+          patch = gzip.decompress(base64.b64decode(encoded, validate=True))
           path = Path('/tmp/adaptacion.patch')
           path.write_bytes(patch)
           subprocess.run(['git', 'apply', '--check', str(path)], check=True)
           subprocess.run(['git', 'apply', str(path)], check=True)
           PY
 
-      - name: Compilar
-        run: python -m py_compile app_emergenciacombinado_core.py app_emergenciacombinado.py
-
-      - name: Verificar arquitectura común
+      - name: Compilar y verificar
         shell: bash
         run: |
+          python -m py_compile app_emergenciacombinado_core.py app_emergenciacombinado.py
           python - <<'PY'
           from pathlib import Path
           source = Path('app_emergenciacombinado_core.py').read_text(encoding='utf-8')
@@ -57,9 +57,10 @@ jobs:
       - name: Publicar archivos definitivos
         shell: bash
         run: |
+          rm -rf .migration
           rm -f .github/workflows/export-lolium-source.yml .github/workflows/retry-adaptacion-comun.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add app_emergenciacombinado_core.py app_emergenciacombinado.py .github/workflows
+          git add -A
           git commit -m 'Unifica cálculo hídrico y validación Event-to-Event'
           git push origin HEAD:agent/adaptacion-comun-lolium
