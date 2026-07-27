@@ -16,9 +16,32 @@ PREDWEEM es una herramienta de apoyo a la toma de decisiones agronómicas basada
 
 La implementación de este repositorio está orientada a la localidad de **Olavarría** y debe utilizarse dentro del dominio geográfico, climático y agronómico para el cual fue configurada y validada.
 
+## Estrategia meteorológica
+
+La serie operativa `meteo_daily.csv` utiliza las coordenadas de Olavarría `-36.8799, -60.2160` y separa explícitamente los datos según su origen y función:
+
+- **ERA5-Land:** reanálisis histórico consolidado, utilizado hasta el último día que la API entrega completo.
+- **ERA5:** respaldo explícito si ERA5-Land no presenta una ventana reciente válida.
+- **ECMWF IFS histórico:** completa automáticamente los días posteriores al último reanálisis completo.
+- **ECMWF IFS HRES:** pronóstico operativo desde el día actual hasta siete días posteriores.
+
+Antes de descargar el histórico completo, el actualizador sondea una ventana reciente y detecta el último día con Tmax, Tmin y precipitación válidas. De esta manera, una demora transitoria de ERA5-Land no interrumpe el workflow: los días todavía incompletos pasan al bloque ECMWF IFS sin ser rellenados artificialmente.
+
+El archivo conserva las columnas requeridas por el modelo (`Fecha`, `TMAX`, `TMIN`, `Prec`) y añade:
+
+- `FUENTE`: producto meteorológico utilizado.
+- `TIPO`: `REANALISIS`, `REANALISIS_FALLBACK`, `HISTORICO_MODELO` o `PRONOSTICO`.
+- `FECHA_EMISION`: fecha y hora local de generación del bloque meteorológico.
+
+La precipitación faltante **no se reemplaza por cero ni se arrastra desde el día anterior**. Si la API devuelve fechas discontinuas, duplicados, precipitación negativa o una temperatura máxima inferior a la mínima dentro de un bloque que debería estar completo, la actualización falla y conserva intacto el archivo operativo anterior.
+
+La actualización automática se ejecuta diariamente a las **07:30** y **15:30**, hora de Argentina, y también puede iniciarse manualmente mediante GitHub Actions.
+
 ## Despliegue privado
 
 La aplicación está preparada para ejecutarse desde un checkout privado. Los datos, el logo y los activos científicos deben cargarse desde archivos locales del repositorio. Consulte [PRIVATE_REPOSITORY.md](PRIVATE_REPOSITORY.md).
+
+La actualización meteorológica programada puede continuar funcionando en un repositorio privado mediante GitHub Actions, siempre que Actions permanezca habilitado y el workflow conserve permisos de escritura sobre el contenido del repositorio.
 
 ## Condiciones de uso
 
