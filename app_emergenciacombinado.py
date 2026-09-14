@@ -3,17 +3,20 @@
 Punto de entrada de PREDWEEM Olavarría.
 
 La aplicación científica original se conserva en
-``app_emergenciacombinado_core.py``. Este archivo la ejecuta sin alterar su
-lógica y agrega, al final de la interfaz, una descarga Excel completa de los
-resultados generados.
+``app_emergenciacombinado_core.py``. Este archivo aplica una capa visual de
+intensidad relativa 0–100 % al gráfico principal y agrega, al final de la
+interfaz, una descarga Excel completa de los resultados generados.
 """
 from pathlib import Path
 
 from visualizacion_horizonte_pronostico import mostrar_horizonte_pronostico
+from visualizacion_intensidad_relativa import parchear_visualizacion_intensidad_relativa
 
 _CORE_APP = Path(__file__).with_name("app_emergenciacombinado_core.py")
+_core_source = _CORE_APP.read_text(encoding="utf-8")
+_core_source = parchear_visualizacion_intensidad_relativa(_core_source)
 exec(
-    compile(_CORE_APP.read_text(encoding="utf-8"), str(_CORE_APP), "exec"),
+    compile(_core_source, str(_CORE_APP), "exec"),
     globals(),
 )
 
