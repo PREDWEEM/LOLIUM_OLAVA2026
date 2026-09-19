@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -84,7 +85,17 @@ def _resumen_fechas(
 
 
 def _get_json(url: str, params: dict) -> dict:
-    respuesta = requests.get(url, params=params, timeout=TIMEOUT_SEGUNDOS)
+    for intento in range(1, 4):
+        try:
+            respuesta = requests.get(url, params=params, timeout=TIMEOUT_SEGUNDOS)
+            respuesta.raise_for_status()
+            break
+        except (requests.Timeout, requests.ConnectionError, requests.HTTPError) as exc:
+            estado = getattr(getattr(exc, "response", None), "status_code", None)
+            if intento == 3 or (estado is not None and estado != 429 and estado < 500):
+                raise
+            print(f"ADVERTENCIA: consulta fallida ({intento}/3); se reintentará: {exc}")
+            time.sleep(5 * intento)
     print(f"URL consultada: {respuesta.url}")
     respuesta.raise_for_status()
     payload = respuesta.json()
@@ -484,6 +495,23 @@ def _bloque_reanalisis_congelado(
     return df_existente.loc[mascara, COLUMNAS_SALIDA].copy()
 
 
+def _inicio_recuperacion(
+    congelado: pd.DataFrame, fecha_refresco: date,
+) -> date:
+    """Recupera desde el primer día sin reanálisis válido, aun tras semanas sin ejecutar."""
+    esperadas = pd.date_range(
+        FECHA_INICIO, fecha_refresco - timedelta(days=1), freq="D"
+    )
+    validas = (
+        congelado[["TMAX", "TMIN", "Prec"]].notna().all(axis=1)
+        & (congelado["TMAX"] >= congelado["TMIN"])
+        & (congelado["Prec"] >= 0)
+    )
+    presentes = pd.DatetimeIndex(congelado.loc[validas, "Fecha"])
+    faltantes = esperadas.difference(presentes)
+    return faltantes.min().date() if len(faltantes) else fecha_refresco
+
+
 def _validar_continuidad(
     df: pd.DataFrame,
     fecha_final: date,
@@ -537,11 +565,12 @@ def actualizar_meteorologia() -> pd.DataFrame:
         fecha_refresco_reanalisis,
     )
 
-    # Primera migración: reconstruye todo el histórico consolidado.
+    # Recupera también los días pendientes fuera de la ventana reciente.
     # Ejecuciones posteriores: solo refresca la cola reciente.
-    reanalisis_desde = (
-        FECHA_INICIO if congelado.empty else fecha_refresco_reanalisis
-    )
+    reanalisis_desde = _inicio_recuperacion(congelado, fecha_refresco_reanalisis)
+    congelado = congelado.loc[
+        congelado["Fecha"].dt.date < reanalisis_desde
+    ].copy()
     reanalisis = _descargar_historico_modelo(
         reanalisis_desde,
         reanalisis_hasta,
