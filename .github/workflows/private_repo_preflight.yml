@@ -38,6 +38,9 @@ jobs:
             "app_emergenciacombinado.py"
             "app_emergenciacombinado_core.py"
             "visualizacion_intensidad_relativa.py"
+            "alerta_lolmu.py"
+            "alerta_lolmu_params.json"
+            "visualizacion_alerta_lolmu.py"
             "meteo_daily.csv"
             "IW.npy"
             "LW.npy"
@@ -66,7 +69,9 @@ jobs:
             app_emergenciacombinado_core.py \
             visualizacion_intensidad_relativa.py \
             actualizar_clima.py \
-            descargar_clima_olavarria.py
+            descargar_clima_olavarria.py \
+            alerta_lolmu.py \
+            visualizacion_alerta_lolmu.py
 
       - name: Prueba preliminar de escala relativa 0-100
         run: |
