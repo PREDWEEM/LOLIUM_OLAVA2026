@@ -37,6 +37,32 @@ La precipitación faltante **no se reemplaza por cero ni se arrastra desde el d�
 
 La actualización automática se ejecuta diariamente a las **07:30** y **15:30**, hora de Argentina, y también puede iniciarse manualmente mediante GitHub Actions.
 
+## Alerta de flushes
+
+La página muestra la **alerta de flushes** de *Lolium multiflorum*: la probabilidad de que en los próximos 7 días emerja
+≥ 5 % de la campaña, con dos niveles (*Atención* desde 15 %, *Alerta* desde 25 %), la emergencia acumulada esperada y la
+ventana de control post-emergente (600–800 °Cd desde el inicio). El modelo (`alerta_lolmu.py`, `alerta_lolmu_params.json`,
+`visualizacion_alerta_lolmu.py`) es el calibrado con 17 campañas de Bordenave y combina, con la información disponible a la
+fecha de emisión: el calendario medio de emergencia de LOLMU; la respuesta a las lluvias ya registradas; opcionalmente, la
+fecha en que se vieron las primeras plántulas del lote (que además ancla el reloj térmico; sin ese dato se usa el primer pico
+del motor PREDWEEM); y, opcionalmente, conteos de plántulas (tabla o planilla Excel/CSV).
+
+**Comprobación en Olavarría.** Sin reajustar el modelo, con los conteos de 2026 (`data/campanias/2026/`; 7 fechas entre el
+20/03 y el 20/06, 6 intervalos de 12 a 20 días, 4 con flush) y el clima de este repositorio: AUC 1,00; con la fecha de
+primeras plántulas, los 4 intervalos con flush quedaron en *Alerta* y ninguno de los 2 sin flush. Es una comprobación mínima
+(una campaña, 6 intervalos largos y sin conteo inicial en cero), no una validación; no hay gemelo digital de Olavarría con el
+que comparar. El clima es reanálisis ERA5, no de estación. La curva acumulada es el calendario de Bordenave.
+
+La barra lateral conserva solo los parámetros que usa la alerta (temperaturas base, óptima y crítica, y objetivos 600 y
+800 °Cd); los del motor PREDWEEM quedan en sus valores por defecto (cobertura de rastrojo 10 %).
+
+## Campaña vigente y actualización automática
+
+La campaña meteorológica va del **1 de enero al 1 de octubre** de cada año (`_campania_vigente()` en `actualizar_clima.py`;
+las variables `CAMPANIA_INICIO` y `CAMPANIA_FIN` la fijan a mano). Después del 1 de octubre la serie queda cerrada; el
+**1 de enero siguiente** la carga se reinicia sola. En los primeros 21 días se admite no tener todavía reanálisis del año: ECMWF
+IFS histórico cubre desde el 1 de enero. `test_actualizar_clima.py` prueba el reinicio.
+
 ## Despliegue privado
 
 La aplicación está preparada para ejecutarse desde un checkout privado. Los datos, el logo y los activos científicos deben cargarse desde archivos locales del repositorio. Consulte [PRIVATE_REPOSITORY.md](PRIVATE_REPOSITORY.md).
@@ -57,11 +83,10 @@ PREDWEEM es una herramienta de soporte para decisiones y no sustituye el diagnó
 
 **PREDWEEM by Guillermo R. Chantre**
 
-## Fin de carga de la campaña 2026
+## Fin de carga de cada campaña
 
-La última fecha meteorológica es el **1 de octubre de 2026, inclusive**.
-El pronóstico se recorta al alcanzar ese límite. Desde el 2 de octubre
-no se consulta el pronóstico futuro. Las consultas históricas ERA5-Land,
-ERA5 y ECMWF IFS quedan limitadas al 1 de octubre, permitiendo actualizar
-el reanálisis de los días pendientes sin ampliar la campaña.
-La serie cerrada debe ser continua y no admite fechas posteriores al límite.
+La última fecha meteorológica de cada campaña es el **1 de octubre, inclusive** (en 2026, el 1/10/2026). El pronóstico se
+recorta al alcanzar ese límite y desde el 2 de octubre no se consulta el pronóstico futuro. Las consultas históricas ERA5-Land,
+ERA5 y ECMWF IFS quedan limitadas al 1 de octubre, permitiendo actualizar el reanálisis de los días pendientes sin ampliar la
+campaña. La serie cerrada debe ser continua y no admite fechas posteriores al límite. El 1 de enero siguiente comienza la
+campaña nueva.
