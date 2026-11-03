@@ -130,8 +130,8 @@ NOTA_OLAVARRIA = (
     "**Validación en Olavarría.** El modelo se calibró en Bordenave y se probó, sin reajustarlo, con los conteos de "
     "Olavarría 2026 (`data/campanias/2026/`; 7 fechas entre el 20/03 y el 20/06, cada 12 a 20 días; 6 intervalos, 4 con "
     "emergencia ≥ 5 % de la campaña por semana) y el clima de esta app. Emitida al comienzo de cada intervalo, la alerta "
-    "ordenó perfectamente los intervalos con y sin flush (AUC 1,00): con la fecha de primeras plántulas, los 4 quedaron en "
-    "*Alerta* y ninguno de los 2 sin flush. No hay gemelo digital de Olavarría con el que comparar.\n\n"
+    "ordenó perfectamente los intervalos con y sin gran flujo (AUC 1,00): con la fecha de primeras plántulas, los 4 quedaron en "
+    "*Alerta* y ninguno de los 2 sin gran flujo. No hay gemelo digital de Olavarría con el que comparar.\n\n"
     "**Límites en Olavarría.** Una sola campaña y apenas 6 intervalos largos, sin un conteo inicial en cero (el primero, el "
     "20/03, ya tenía plántulas): es una comprobación mínima, no una validación. El clima es reanálisis ERA5 en la grilla de "
     "Olavarría, no observaciones de estación. La alerta con conteos está calibrada con conteos semanales; con recorridas "
@@ -203,7 +203,7 @@ if isinstance(_resultados_alerta, dict) and _resultados_alerta:
     st.subheader("📥 Descarga de resultados")
     st.caption(
         "Excel con los resultados que muestra la app para la fecha de emisión elegida: resumen (nivel y probabilidad de "
-        "flush, inicio y ventana de control 600–800 °Cd, emergencia acumulada esperada), alerta semanal, emergencia "
+        "gran flujo, inicio y ventana de control 600–800 °Cd, emergencia acumulada esperada), alerta semanal, emergencia "
         "acumulada con su rango, tiempo térmico diario desde el inicio, conteos usados, clima, parámetros y validación."
     )
     st.download_button(
