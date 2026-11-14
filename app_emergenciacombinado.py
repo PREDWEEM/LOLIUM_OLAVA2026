@@ -15,8 +15,8 @@ La aplicación científica original se conserva en ``app_emergenciacombinado_cor
   la barra lateral conserva los parámetros de la ventana de control.
 
 El motor sigue calculando como antes: su primer pico se usa como inicio estimado del reloj térmico hasta
-que se informa la fecha de las primeras plántulas. La alerta (``alerta_lolmu.py``) es la calibrada con
-17 campañas de Bordenave y probada con los conteos de Olavarría 2026.
+que se informa la fecha de las primeras plántulas. La alerta (``alerta_lolmu.py``) es la del paquete lolium-comun,
+probada con los conteos de Olavarría 2026.
 """
 from pathlib import Path
 
@@ -133,7 +133,7 @@ if "df" in globals() and isinstance(df, pd.DataFrame) and not df.empty:
     mostrar_horizonte_pronostico(df, "Olavarría")
 
 NOTA_OLAVARRIA = (
-    "**Validación en Olavarría.** El modelo se calibró en Bordenave y se probó, sin reajustarlo, con los conteos de "
+    "**Validación en Olavarría.** El modelo se probó, sin reajustarlo, con los conteos de "
     "Olavarría 2026 (`data/campanias/2026/`; 7 fechas entre el 20/03 y el 20/06, cada 12 a 20 días; 6 intervalos, 4 con "
     "emergencia ≥ 5 % de la campaña por semana) y el clima de esta app. Emitida al comienzo de cada intervalo, la alerta "
     "ordenó perfectamente los intervalos con y sin gran flujo (AUC 1,00): con la fecha de primeras plántulas, los 4 quedaron en "
@@ -141,7 +141,7 @@ NOTA_OLAVARRIA = (
     "**Límites en Olavarría.** Una sola campaña y apenas 6 intervalos largos, sin un conteo inicial en cero (el primero, el "
     "20/03, ya tenía plántulas): es una comprobación mínima, no una validación. El clima es reanálisis ERA5 en la grilla de "
     "Olavarría, no observaciones de estación. La alerta con conteos está calibrada con conteos semanales; con recorridas "
-    "espaciadas conviene usar sobre todo la fecha de primeras plántulas. La curva acumulada es el calendario de Bordenave; con "
+    "espaciadas conviene usar sobre todo la fecha de primeras plántulas. La curva acumulada es el calendario de referencia regional; con "
     "una segunda campaña de Olavarría se podrá usar un calendario propio, como en Tres Arroyos."
 )
 
